@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Rook Authors. All rights reserved.
+Copyright 2018 The Rook Authors. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package v1alpha1
 import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	rook "github.com/rook/rook/pkg/apis/rook.io/v1alpha2"
 )
 
 // ***************************************************************************
@@ -46,26 +48,27 @@ type ClusterList struct {
 }
 
 type ClusterSpec struct {
-	// The type of backend for the cluster (only "ceph" is implemented)
-	Backend string `json:"backend"`
-
-	// The path on the host where config and data can be persisted.
-	DataDirHostPath string `json:"dataDirHostPath"`
+	// A spec for available storage in the cluster and how it should be used
+	Storage rook.StorageScopeSpec `json:"scope,omitempty"`
 
 	// The placement-related configuration to pass to kubernetes (affinity, node selector, tolerations).
-	Placement PlacementSpec `json:"placement,omitempty"`
+	Placement rook.PlacementSpec `json:"placement,omitempty"`
 
-	// A spec for available storage in the cluster and how it should be used
-	Storage StorageSpec `json:"storage"`
-
-	// HostNetwork to enable host network
-	HostNetwork bool `json:"hostNetwork"`
-
-	// MonCount sets the mon size
-	MonCount int `json:"monCount"`
+	// Network related configuration
+	Network rook.NetworkSpec `json:"network,omitempty"`
 
 	// Resources set resource requests and limits
-	Resources ResourceSpec `json:"resources,omitempty"`
+	Resources rook.ResourceSpec `json:"resources,omitempty"`
+
+	// The path on the host where config and data can be persisted.
+	DataDirHostPath string `json:"dataDirHostPath,omitempty"`
+
+	// MonCount sets the mon size
+	MonCount int `json:"monCount,omitempty"`
+
+	MetadataDevice string `json:"metadataDevice,omitempty"`
+
+	StoreConfig string `json:"storeConfig,omitempty"`
 }
 
 type ClusterStatus struct {
@@ -82,69 +85,11 @@ const (
 	ClusterStateError    ClusterState = "Error"
 )
 
-type ResourceSpec struct {
-	API v1.ResourceRequirements `json:"api,omitempty"`
-	Mgr v1.ResourceRequirements `json:"mgr,omitempty"`
-	Mon v1.ResourceRequirements `json:"mon,omitempty"`
-	OSD v1.ResourceRequirements `json:"osd,omitempty"`
-}
-
-type StorageSpec struct {
-	Nodes       []Node `json:"nodes,omitempty"`
-	UseAllNodes bool   `json:"useAllNodes,omitempty"`
-	Selection
-	Config
-}
-
-type Node struct {
-	Name      string                  `json:"name,omitempty"`
-	Devices   []Device                `json:"devices,omitempty"`
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
-	Selection
-	Config
-}
-
-type Device struct {
-	Name string `json:"name,omitempty"`
-}
-
-type Directory struct {
-	Path string `json:"path,omitempty"`
-}
-
-type Selection struct {
-	// Whether to consume all the storage devices found on a machine
-	UseAllDevices *bool `json:"useAllDevices,omitempty"`
-
-	// A regular expression to allow more fine-grained selection of devices on nodes across the cluster
-	DeviceFilter string `json:"deviceFilter,omitempty"`
-
-	MetadataDevice string `json:"metadataDevice,omitempty"`
-
-	Directories []Directory `json:"directories,omitempty"`
-}
-
-type Config struct {
-	StoreConfig StoreConfig `json:"storeConfig,omitempty"`
-	Location    string      `json:"location,omitempty"`
-}
-
 type StoreConfig struct {
 	StoreType      string `json:"storeType,omitempty"`
 	WalSizeMB      int    `json:"walSizeMB,omitempty"`
 	DatabaseSizeMB int    `json:"databaseSizeMB,omitempty"`
 	JournalSizeMB  int    `json:"journalSizeMB,omitempty"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type PlacementSpec struct {
-	metav1.TypeMeta `json:",inline"`
-	All             Placement `json:"all,omitempty"`
-	API             Placement `json:"api,omitempty"`
-	Mgr             Placement `json:"mgr,omitempty"`
-	Mon             Placement `json:"mon,omitempty"`
-	OSD             Placement `json:"osd,omitempty"`
 }
 
 // +genclient
@@ -264,7 +209,7 @@ type MetadataServerSpec struct {
 	ActiveStandby bool `json:"activeStandby"`
 
 	// The affinity to place the mds pods (default is to place on all available node) with a daemonset
-	Placement Placement `json:"placement"`
+	Placement rook.Placement `json:"placement"`
 
 	// The resource requirements for the rgw pods
 	Resources v1.ResourceRequirements `json:"resources"`
@@ -283,15 +228,6 @@ type ObjectStore struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ObjectStoreList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata"`
-	Items           []ObjectStore `json:"items"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// ObjectstoreList is the definition of a list of object stores for TPRs (pre-1.7)
-type ObjectstoreList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 	Items           []ObjectStore `json:"items"`
@@ -326,20 +262,8 @@ type GatewaySpec struct {
 	SSLCertificateRef string `json:"sslCertificateRef"`
 
 	// The affinity to place the rgw pods (default is to place on any available node)
-	Placement Placement `json:"placement"`
+	Placement rook.Placement `json:"placement"`
 
 	// The resource requirements for the rgw pods
 	Resources v1.ResourceRequirements `json:"resources"`
-}
-
-// +genclient:noStatus
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// Placement encapsulates the various kubernetes options that control where pods are scheduled and executed.
-type Placement struct {
-	metav1.TypeMeta `json:",inline"`
-	NodeAffinity    *v1.NodeAffinity    `json:"nodeAffinity,omitempty"`
-	PodAffinity     *v1.PodAffinity     `json:"podAffinity,omitempty"`
-	PodAntiAffinity *v1.PodAntiAffinity `json:"podAntiAffinity,omitempty"`
-	Tolerations     []v1.Toleration     `json:"tolerations,omitempty"`
 }
