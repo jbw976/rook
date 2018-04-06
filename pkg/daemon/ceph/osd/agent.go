@@ -27,7 +27,7 @@ import (
 
 	"github.com/google/uuid"
 
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/daemon/ceph/client"
 	"github.com/rook/rook/pkg/daemon/ceph/mon"
@@ -55,14 +55,14 @@ type OsdAgent struct {
 	metadataDevice    string
 	directories       string
 	procMan           *proc.ProcManager
-	storeConfig       rookalpha.StoreConfig
+	storeConfig       cephv1alpha1.StoreConfig
 	kv                *k8sutil.ConfigMapKVStore
 	configCounter     int32
 	osdsCompleted     chan struct{}
 }
 
 func NewAgent(context *clusterd.Context, devices string, usingDeviceFilter bool, metadataDevice, directories string, forceFormat bool,
-	location string, storeConfig rookalpha.StoreConfig, cluster *mon.ClusterInfo, nodeName string, kv *k8sutil.ConfigMapKVStore) *OsdAgent {
+	location string, storeConfig cephv1alpha1.StoreConfig, cluster *mon.ClusterInfo, nodeName string, kv *k8sutil.ConfigMapKVStore) *OsdAgent {
 
 	return &OsdAgent{devices: devices, usingDeviceFilter: usingDeviceFilter, metadataDevice: metadataDevice,
 		directories: directories, forceFormat: forceFormat, location: location, storeConfig: storeConfig,

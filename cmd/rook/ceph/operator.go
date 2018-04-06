@@ -13,11 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package ceph
 
 import (
 	"fmt"
 
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/daemon/agent/flexvolume/attachment"
 	"github.com/rook/rook/pkg/operator"
@@ -39,20 +40,20 @@ https://github.com/rook/rook`,
 func init() {
 	operatorCmd.Flags().DurationVar(&mon.HealthCheckInterval, "mon-healthcheck-interval", mon.HealthCheckInterval, "mon health check interval (duration)")
 	operatorCmd.Flags().DurationVar(&mon.MonOutTimeout, "mon-out-timeout", mon.MonOutTimeout, "mon out timeout (duration)")
-	flags.SetFlagsFromEnv(operatorCmd.Flags(), RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(operatorCmd.Flags(), rook.RookEnvVarPrefix)
 
 	operatorCmd.RunE = startOperator
 }
 
 func startOperator(cmd *cobra.Command, args []string) error {
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(operatorCmd.Flags())
+	rook.LogStartupInfo(operatorCmd.Flags())
 
-	clientset, apiExtClientset, rookClientset, err := getClientset()
+	clientset, apiExtClientset, rookClientset, err := rook.GetClientset()
 	if err != nil {
-		terminateFatal(fmt.Errorf("failed to get k8s client. %+v", err))
+		rook.TerminateFatal(fmt.Errorf("failed to get k8s client. %+v", err))
 	}
 
 	logger.Infof("starting operator")
@@ -64,19 +65,19 @@ func startOperator(cmd *cobra.Command, args []string) error {
 	context.RookClientset = rookClientset
 	volumeAttachment, err := attachment.New(context)
 	if err != nil {
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	// Using the rook-operator image to deploy other rook pods
 	rookImage, err := k8sutil.GetContainerImage(clientset, containerName)
 	if err != nil {
-		terminateFatal(fmt.Errorf("failed to get container image. %+v\n", err))
+		rook.TerminateFatal(fmt.Errorf("failed to get container image. %+v\n", err))
 	}
 
 	op := operator.New(context, volumeAttachment, rookImage)
 	err = op.Run()
 	if err != nil {
-		terminateFatal(fmt.Errorf("failed to run operator. %+v\n", err))
+		rook.TerminateFatal(fmt.Errorf("failed to run operator. %+v\n", err))
 	}
 
 	return nil

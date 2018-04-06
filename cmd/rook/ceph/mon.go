@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package ceph
 
 import (
 	"fmt"
@@ -21,6 +21,7 @@ import (
 	"path"
 
 	"github.com/go-ini/ini"
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/daemon/ceph/mon"
 	"github.com/rook/rook/pkg/util/flags"
 	"github.com/spf13/cobra"
@@ -37,24 +38,12 @@ var (
 	monPort int32
 )
 
-func addCephFlags(command *cobra.Command) {
-	command.Flags().StringVar(&cfg.networkInfo.PublicAddrIPv4, "public-ipv4", "127.0.0.1", "public IPv4 address for this machine")
-	command.Flags().StringVar(&cfg.networkInfo.ClusterAddrIPv4, "private-ipv4", "127.0.0.1", "private IPv4 address for this machine")
-	command.Flags().StringVar(&clusterInfo.Name, "cluster-name", "rookcluster", "ceph cluster name")
-	command.Flags().StringVar(&clusterInfo.FSID, "fsid", "", "the cluster uuid")
-	command.Flags().StringVar(&clusterInfo.MonitorSecret, "mon-secret", "", "the cephx keyring for monitors")
-	command.Flags().StringVar(&clusterInfo.AdminSecret, "admin-secret", "", "secret for the admin user (random if not specified)")
-	command.Flags().StringVar(&cfg.monEndpoints, "mon-endpoints", "", "ceph mon endpoints")
-	command.Flags().StringVar(&cfg.dataDir, "config-dir", "/var/lib/rook", "directory for storing configuration")
-	command.Flags().StringVar(&cfg.cephConfigOverride, "ceph-config-override", "", "optional path to a ceph config file that will be appended to the config files that rook generates")
-}
-
 func init() {
 	monCmd.Flags().StringVar(&monName, "name", "", "name of the monitor")
 	monCmd.Flags().Int32Var(&monPort, "port", 0, "port of the monitor")
 	addCephFlags(monCmd)
 
-	flags.SetFlagsFromEnv(monCmd.Flags(), RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(monCmd.Flags(), rook.RookEnvVarPrefix)
 
 	monCmd.RunE = startMon
 }
@@ -65,16 +54,16 @@ func startMon(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(monCmd.Flags())
+	rook.LogStartupInfo(monCmd.Flags())
 
 	if monPort == 0 {
 		return fmt.Errorf("missing mon port")
 	}
 
 	if err := compareMonSecret(clusterInfo.MonitorSecret, path.Join(cfg.dataDir, monName)); err != nil {
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	// at first start the local monitor needs to be added to the list of mons
@@ -88,7 +77,7 @@ func startMon(cmd *cobra.Command, args []string) error {
 	}
 	err := mon.Run(createContext(), monCfg)
 	if err != nil {
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	return nil

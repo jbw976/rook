@@ -20,9 +20,10 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
-	"github.com/rook/rook/pkg/operator/k8sutil"
 	"k8s.io/apimachinery/pkg/api/errors"
+
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
+	"github.com/rook/rook/pkg/operator/k8sutil"
 )
 
 const (
@@ -200,7 +201,7 @@ func (s *PerfScheme) doSchemeEntryAction(entry *PerfSchemeEntry, action func(*Pe
 }
 
 // populates a partition scheme entry for an OSD where all its partitions are collocated on a single device
-func PopulateCollocatedPerfSchemeEntry(entry *PerfSchemeEntry, device string, storeConfig rookalpha.StoreConfig) error {
+func PopulateCollocatedPerfSchemeEntry(entry *PerfSchemeEntry, device string, storeConfig cephv1alpha1.StoreConfig) error {
 
 	if storeConfig.StoreType == Filestore {
 		diskUUID, dataUUID, _, err := createFilestoreUUIDs()
@@ -268,7 +269,7 @@ func PopulateCollocatedPerfSchemeEntry(entry *PerfSchemeEntry, device string, st
 // populates a partition scheme entry for an OSD that will have distributed partitions: its metadata will live on a
 // dedicated metadata device and its block data will live on a dedicated device
 func PopulateDistributedPerfSchemeEntry(entry *PerfSchemeEntry, device string, metadataInfo *MetadataDeviceInfo,
-	storeConfig rookalpha.StoreConfig) error {
+	storeConfig cephv1alpha1.StoreConfig) error {
 
 	if storeConfig.StoreType == Filestore {
 		// TODO: support separate metadata device for filestore

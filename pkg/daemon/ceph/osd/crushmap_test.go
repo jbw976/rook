@@ -19,7 +19,7 @@ import (
 	"strings"
 	"testing"
 
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/operator/cluster/ceph/osd/config"
 	"github.com/rook/rook/pkg/util"
@@ -28,11 +28,11 @@ import (
 )
 
 func TestCrushMap(t *testing.T) {
-	testCrushMapHelper(t, &rookalpha.StoreConfig{StoreType: config.Filestore})
-	testCrushMapHelper(t, &rookalpha.StoreConfig{StoreType: config.Bluestore})
+	testCrushMapHelper(t, &cephv1alpha1.StoreConfig{StoreType: config.Filestore})
+	testCrushMapHelper(t, &cephv1alpha1.StoreConfig{StoreType: config.Bluestore})
 }
 
-func testCrushMapHelper(t *testing.T, storeConfig *rookalpha.StoreConfig) {
+func testCrushMapHelper(t *testing.T, storeConfig *cephv1alpha1.StoreConfig) {
 	executor := &exectest.MockExecutor{}
 	executor.MockExecuteCommandWithOutput = func(debug bool, name string, command string, args ...string) (string, error) {
 		logger.Infof("OUTPUT for %s. %s %+v", name, command, args)

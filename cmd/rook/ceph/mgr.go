@@ -13,9 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package ceph
 
 import (
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/daemon/ceph/mgr"
 	"github.com/rook/rook/pkg/daemon/ceph/mon"
 	"github.com/rook/rook/pkg/util/flags"
@@ -38,7 +39,7 @@ func init() {
 	mgrCmd.Flags().StringVar(&mgrKeyring, "mgr-keyring", "", "the mgr keyring")
 	addCephFlags(mgrCmd)
 
-	flags.SetFlagsFromEnv(mgrCmd.Flags(), RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(mgrCmd.Flags(), rook.RookEnvVarPrefix)
 
 	mgrCmd.RunE = startMgr
 }
@@ -49,9 +50,9 @@ func startMgr(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(mgrCmd.Flags())
+	rook.LogStartupInfo(mgrCmd.Flags())
 
 	clusterInfo.Monitors = mon.ParseMonEndpoints(cfg.monEndpoints)
 	config := &mgr.Config{
@@ -62,7 +63,7 @@ func startMgr(cmd *cobra.Command, args []string) error {
 
 	err := mgr.Run(createContext(), config)
 	if err != nil {
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	return nil

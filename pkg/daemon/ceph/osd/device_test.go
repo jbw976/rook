@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/operator/cluster/ceph/osd/config"
 	exectest "github.com/rook/rook/pkg/util/exec/test"
@@ -143,7 +143,7 @@ NAME="sda3" SIZE="20" TYPE="part" PKNAME="sda"`
 		return output, nil
 	}
 
-	storeConfig := rookalpha.StoreConfig{StoreType: config.Bluestore}
+	storeConfig := cephv1alpha1.StoreConfig{StoreType: config.Bluestore}
 
 	// set up a partition scheme entry for sda (collocated metadata and data)
 	entry := config.NewPerfSchemeEntry(storeConfig.StoreType)
@@ -205,7 +205,7 @@ func TestPartitionBluestoreMetadata(t *testing.T) {
 	context := &clusterd.Context{Executor: executor, ConfigDir: configDir}
 
 	// create metadata partition information for 2 OSDs (sdb, sdc) storing their metadata on device sda
-	storeConfig := rookalpha.StoreConfig{StoreType: config.Bluestore, WalSizeMB: 1, DatabaseSizeMB: 2}
+	storeConfig := cephv1alpha1.StoreConfig{StoreType: config.Bluestore, WalSizeMB: 1, DatabaseSizeMB: 2}
 	metadata := config.NewMetadataDeviceInfo("sda")
 
 	e1 := config.NewPerfSchemeEntry(config.Bluestore)
@@ -251,7 +251,7 @@ func TestPartitionBluestoreMetadataSafe(t *testing.T) {
 	context := &clusterd.Context{Executor: executor, ConfigDir: configDir}
 
 	// create metadata partition information for 1 OSD (sda) storing its metadata on device nvme01
-	storeConfig := rookalpha.StoreConfig{StoreType: config.Bluestore, WalSizeMB: 1, DatabaseSizeMB: 2}
+	storeConfig := cephv1alpha1.StoreConfig{StoreType: config.Bluestore, WalSizeMB: 1, DatabaseSizeMB: 2}
 	metadata := config.NewMetadataDeviceInfo("nvme01")
 	e1 := config.NewPerfSchemeEntry(config.Bluestore)
 	e1.ID = 1
@@ -266,11 +266,11 @@ func TestPartitionBluestoreMetadataSafe(t *testing.T) {
 }
 
 func TestPartitionOSD(t *testing.T) {
-	testPartitionOSDHelper(t, rookalpha.StoreConfig{StoreType: config.Bluestore, WalSizeMB: 1, DatabaseSizeMB: 2})
-	testPartitionOSDHelper(t, rookalpha.StoreConfig{StoreType: config.Filestore})
+	testPartitionOSDHelper(t, cephv1alpha1.StoreConfig{StoreType: config.Bluestore, WalSizeMB: 1, DatabaseSizeMB: 2})
+	testPartitionOSDHelper(t, cephv1alpha1.StoreConfig{StoreType: config.Filestore})
 }
 
-func testPartitionOSDHelper(t *testing.T, storeConfig rookalpha.StoreConfig) {
+func testPartitionOSDHelper(t *testing.T, storeConfig cephv1alpha1.StoreConfig) {
 	// set up a temporary config directory that will be cleaned up after test
 	configDir, err := ioutil.TempDir("", "TestPartitionBluestoreOSD")
 	if err != nil {

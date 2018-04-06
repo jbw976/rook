@@ -13,13 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package ceph
 
 import (
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/daemon/ceph/client"
 	"github.com/rook/rook/pkg/daemon/ceph/mon"
 	"github.com/rook/rook/pkg/daemon/ceph/osd"
@@ -62,7 +63,7 @@ func addOSDFlags(command *cobra.Command) {
 func init() {
 	addOSDFlags(osdCmd)
 	addCephFlags(osdCmd)
-	flags.SetFlagsFromEnv(osdCmd.Flags(), RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(osdCmd.Flags(), rook.RookEnvVarPrefix)
 
 	osdCmd.RunE = startOSD
 }
@@ -86,13 +87,13 @@ func startOSD(cmd *cobra.Command, args []string) error {
 		dataDevices = cfg.devices
 	}
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(osdCmd.Flags())
+	rook.LogStartupInfo(osdCmd.Flags())
 
-	clientset, _, rookClientset, err := getClientset()
+	clientset, _, rookClientset, err := rook.GetClientset()
 	if err != nil {
-		terminateFatal(fmt.Errorf("failed to init k8s client. %+v\n", err))
+		rook.TerminateFatal(fmt.Errorf("failed to init k8s client. %+v\n", err))
 	}
 
 	context := createContext()
@@ -101,7 +102,7 @@ func startOSD(cmd *cobra.Command, args []string) error {
 
 	locArgs, err := client.FormatLocation(cfg.location, cfg.nodeName)
 	if err != nil {
-		terminateFatal(fmt.Errorf("invalid location. %+v\n", err))
+		rook.TerminateFatal(fmt.Errorf("invalid location. %+v\n", err))
 	}
 	crushLocation := strings.Join(locArgs, " ")
 
@@ -121,7 +122,7 @@ func startOSD(cmd *cobra.Command, args []string) error {
 		}
 		oposd.UpdateOrchestrationStatusMap(clientset, clusterInfo.Name, cfg.nodeName, status)
 
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	return nil

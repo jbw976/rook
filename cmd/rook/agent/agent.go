@@ -13,52 +13,59 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package agent
 
 import (
 	"fmt"
 
+	"github.com/coreos/pkg/capnslog"
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/daemon/agent"
 	"github.com/rook/rook/pkg/operator/k8sutil"
+	"github.com/rook/rook/pkg/util/exec"
 	"github.com/rook/rook/pkg/util/flags"
 	"github.com/spf13/cobra"
 )
 
-var agentCmd = &cobra.Command{
+var AgentCmd = &cobra.Command{
 	Use:    "agent",
 	Short:  "Runs the rook agent",
 	Hidden: true,
 }
 
+var logger = capnslog.NewPackageLogger("github.com/rook/rook", "agentcmd")
+
 func init() {
-	flags.SetFlagsFromEnv(agentCmd.Flags(), "ROOK")
-	agentCmd.RunE = startAgent
+	flags.SetFlagsFromEnv(AgentCmd.Flags(), "ROOK")
+	AgentCmd.RunE = startAgent
 }
 
 func startAgent(cmd *cobra.Command, args []string) error {
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(agentCmd.Flags())
+	rook.LogStartupInfo(AgentCmd.Flags())
 
-	clientset, apiExtClientset, rookClientset, err := getClientset()
+	clientset, apiExtClientset, rookClientset, err := rook.GetClientset()
 	if err != nil {
-		terminateFatal(fmt.Errorf("failed to get k8s client. %+v", err))
+		rook.TerminateFatal(fmt.Errorf("failed to get k8s client. %+v", err))
 	}
 
 	logger.Info("starting rook agent")
-	context := createContext()
-	context.NetworkInfo = clusterd.NetworkInfo{}
-	context.ConfigDir = k8sutil.DataDir
-	context.Clientset = clientset
-	context.APIExtensionClientset = apiExtClientset
-	context.RookClientset = rookClientset
+	context := &clusterd.Context{
+		Executor:              &exec.CommandExecutor{},
+		ConfigDir:             k8sutil.DataDir,
+		NetworkInfo:           clusterd.NetworkInfo{},
+		Clientset:             clientset,
+		APIExtensionClientset: apiExtClientset,
+		RookClientset:         rookClientset,
+	}
 
 	agent := agent.New(context)
 	err = agent.Run()
 	if err != nil {
-		terminateFatal(fmt.Errorf("failed to run rook agent. %+v\n", err))
+		rook.TerminateFatal(fmt.Errorf("failed to run rook agent. %+v\n", err))
 	}
 
 	return nil

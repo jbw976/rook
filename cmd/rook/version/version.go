@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package version
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var versionCmd = &cobra.Command{
+var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of rook",
 	RunE: func(cmd *cobra.Command, args []string) error {

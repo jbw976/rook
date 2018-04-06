@@ -13,12 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package ceph
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/daemon/ceph/mon"
 	"github.com/rook/rook/pkg/daemon/ceph/rgw"
 	"github.com/rook/rook/pkg/util/flags"
@@ -49,7 +50,7 @@ func init() {
 	rgwCmd.Flags().IntVar(&rgwSecurePort, "rgw-secure-port", 0, "rgw secure port number (https)")
 	addCephFlags(rgwCmd)
 
-	flags.SetFlagsFromEnv(rgwCmd.Flags(), RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(rgwCmd.Flags(), rook.RookEnvVarPrefix)
 
 	rgwCmd.RunE = startRGW
 }
@@ -64,9 +65,9 @@ func startRGW(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("port or secure port are required")
 	}
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(rgwCmd.Flags())
+	rook.LogStartupInfo(rgwCmd.Flags())
 
 	clusterInfo.Monitors = mon.ParseMonEndpoints(cfg.monEndpoints)
 	config := &rgw.Config{
@@ -81,7 +82,7 @@ func startRGW(cmd *cobra.Command, args []string) error {
 
 	err := rgw.Run(createContext(), config)
 	if err != nil {
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	return nil

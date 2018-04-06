@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/operator/k8sutil"
 	testop "github.com/rook/rook/pkg/operator/test"
 	"github.com/stretchr/testify/assert"
@@ -73,7 +73,7 @@ func TestPopulateCollocatedPerfSchemeEntry(t *testing.T) {
 	entry := NewPerfSchemeEntry(Bluestore)
 	entry.ID = 10
 	entry.OsdUUID = uuid.Must(uuid.NewRandom())
-	err := PopulateCollocatedPerfSchemeEntry(entry, "sda", rookalpha.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2})
+	err := PopulateCollocatedPerfSchemeEntry(entry, "sda", cephv1alpha1.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2})
 	assert.Nil(t, err)
 
 	// verify the populated collocated partition entries
@@ -91,7 +91,7 @@ func TestPopulateDistributedPerfSchemeEntry(t *testing.T) {
 	entry.ID = 20
 	entry.OsdUUID = uuid.Must(uuid.NewRandom())
 
-	err := PopulateDistributedPerfSchemeEntry(entry, "sdb", metadata, rookalpha.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2})
+	err := PopulateDistributedPerfSchemeEntry(entry, "sdb", metadata, cephv1alpha1.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2})
 	assert.Nil(t, err)
 
 	// verify the populated distributed partition entries (metadata partitions should be on metadata device, block
@@ -139,7 +139,7 @@ func TestMetadataGetPartitionArgs(t *testing.T) {
 	e2.ID = 2
 	e2.OsdUUID = uuid.Must(uuid.NewRandom())
 
-	storeConfig := rookalpha.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
+	storeConfig := cephv1alpha1.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
 	err := PopulateDistributedPerfSchemeEntry(e1, "sdb", metadata, storeConfig)
 	assert.Nil(t, err)
 	err = PopulateDistributedPerfSchemeEntry(e2, "sdc", metadata, storeConfig)
@@ -163,7 +163,7 @@ func TestSchemeEntryGetPartitionArgs(t *testing.T) {
 	e1.ID = 1
 	e1.OsdUUID = uuid.Must(uuid.NewRandom())
 
-	storeConfig := rookalpha.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
+	storeConfig := cephv1alpha1.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
 	err := PopulateCollocatedPerfSchemeEntry(e1, "sdb", storeConfig)
 	assert.Nil(t, err)
 
@@ -182,7 +182,7 @@ func TestSchemeEntryGetPartitionArgs(t *testing.T) {
 }
 
 func TestDeleteSchemeEntry(t *testing.T) {
-	storeConfig := rookalpha.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
+	storeConfig := cephv1alpha1.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
 
 	// create a partition scheme with some entries
 	scheme := NewPerfScheme()
@@ -217,7 +217,7 @@ func TestDeleteSchemeEntry(t *testing.T) {
 }
 
 func TestUpdateSchemeEntry(t *testing.T) {
-	storeConfig := rookalpha.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
+	storeConfig := cephv1alpha1.StoreConfig{WalSizeMB: 1, DatabaseSizeMB: 2}
 
 	// create a partition scheme with an entry in it
 	scheme := NewPerfScheme()

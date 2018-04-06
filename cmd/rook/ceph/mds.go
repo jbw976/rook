@@ -13,11 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package ceph
 
 import (
 	"strings"
 
+	"github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/pkg/daemon/ceph/mds"
 	"github.com/rook/rook/pkg/daemon/ceph/mon"
 	"github.com/rook/rook/pkg/util/flags"
@@ -42,7 +43,7 @@ func init() {
 	mdsCmd.Flags().BoolVar(&activeStandby, "active-standby", true, "Whether to start in active standby mode")
 	addCephFlags(mdsCmd)
 
-	flags.SetFlagsFromEnv(mdsCmd.Flags(), RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(mdsCmd.Flags(), rook.RookEnvVarPrefix)
 
 	mdsCmd.RunE = startMDS
 }
@@ -53,9 +54,9 @@ func startMDS(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	setLogLevel()
+	rook.SetLogLevel()
 
-	logStartupInfo(mdsCmd.Flags())
+	rook.LogStartupInfo(mdsCmd.Flags())
 
 	// the MDS ID is the last part of the pod name
 	id := podName
@@ -76,7 +77,7 @@ func startMDS(cmd *cobra.Command, args []string) error {
 
 	err := mds.Run(createContext(), config)
 	if err != nil {
-		terminateFatal(err)
+		rook.TerminateFatal(err)
 	}
 
 	return nil

@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/operator/cluster/ceph/osd/config"
 	exectest "github.com/rook/rook/pkg/util/exec/test"
@@ -34,7 +34,7 @@ func TestRunDaemon(t *testing.T) {
 	defer os.RemoveAll(configDir)
 	os.MkdirAll(configDir, 0755)
 
-	agent, _, context := createTestAgent(t, "none", configDir, "node5375", &rookalpha.StoreConfig{StoreType: config.Bluestore})
+	agent, _, context := createTestAgent(t, "none", configDir, "node5375", &cephv1alpha1.StoreConfig{StoreType: config.Bluestore})
 	agent.usingDeviceFilter = true
 
 	done := make(chan struct{})
@@ -225,11 +225,11 @@ NAME="sdb1" SIZE="30" TYPE="part" PKNAME="sdb"`, nil
 }
 
 func TestGetRemovedDevices(t *testing.T) {
-	testGetRemovedDevicesHelper(t, &rookalpha.StoreConfig{StoreType: config.Bluestore})
-	testGetRemovedDevicesHelper(t, &rookalpha.StoreConfig{StoreType: config.Filestore})
+	testGetRemovedDevicesHelper(t, &cephv1alpha1.StoreConfig{StoreType: config.Bluestore})
+	testGetRemovedDevicesHelper(t, &cephv1alpha1.StoreConfig{StoreType: config.Filestore})
 }
 
-func testGetRemovedDevicesHelper(t *testing.T, storeConfig *rookalpha.StoreConfig) {
+func testGetRemovedDevicesHelper(t *testing.T, storeConfig *cephv1alpha1.StoreConfig) {
 	configDir, _ := ioutil.TempDir("", "")
 	defer os.RemoveAll(configDir)
 	os.MkdirAll(configDir, 0755)
