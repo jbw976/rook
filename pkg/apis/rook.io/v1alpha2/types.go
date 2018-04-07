@@ -67,13 +67,7 @@ type Selection struct {
 	Directories []Directory `json:"directories,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type PlacementSpec struct {
-	metav1.TypeMeta `json:",inline"`
-	All             Placement            `json:"all,omitempty"`
-	Entries         map[string]Placement `json:"entries,omitempty"`
-}
+type PlacementSpec map[string]Placement
 
 type Placement struct {
 	NodeAffinity    *v1.NodeAffinity    `json:"nodeAffinity,omitempty"`
@@ -82,12 +76,7 @@ type Placement struct {
 	Tolerations     []v1.Toleration     `json:"tolerations,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type ResourceSpec struct {
-	metav1.TypeMeta `json:",inline"`
-	Entries         map[string]v1.ResourceRequirements `json:"entries,omitempty"`
-}
+type ResourceSpec map[string]v1.ResourceRequirements
 
 type NetworkSpec struct {
 	metav1.TypeMeta `json:",inline"`

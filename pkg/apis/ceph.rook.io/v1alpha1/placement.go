@@ -29,15 +29,15 @@ const (
 
 // GetMgrPlacement returns the placement for the MGR service
 func GetMgrPlacement(p rook.PlacementSpec) rook.Placement {
-	return p.All.Merge(p.Entries[PlacementKeyMgr])
+	return p.All().Merge(p[PlacementKeyMgr])
 }
 
 // GetMonPlacement returns the placement for the MON service
 func GetMonPlacement(p rook.PlacementSpec) rook.Placement {
-	return p.All.Merge(p.Entries[PlacementKeyMon])
+	return p.All().Merge(p[PlacementKeyMon])
 }
 
 // GetOSDPlacement returns the placement for the OSD service
 func GetOSDPlacement(p rook.PlacementSpec) rook.Placement {
-	return p.All.Merge(p.Entries[PlacementKeyOSD])
+	return p.All().Merge(p[PlacementKeyOSD])
 }

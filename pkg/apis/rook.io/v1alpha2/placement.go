@@ -19,6 +19,10 @@ import (
 	"k8s.io/api/core/v1"
 )
 
+func (p PlacementSpec) All() Placement {
+	return p["all"]
+}
+
 // ApplyToPodSpec adds placement to a pod spec
 func (p Placement) ApplyToPodSpec(t *v1.PodSpec) {
 	if t.Affinity == nil {

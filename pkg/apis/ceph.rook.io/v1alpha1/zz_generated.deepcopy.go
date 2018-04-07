@@ -21,6 +21,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1alpha2 "github.com/rook/rook/pkg/apis/rook.io/v1alpha2"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -107,9 +108,23 @@ func (in *ClusterList) DeepCopyObject() runtime.Object {
 func (in *ClusterSpec) DeepCopyInto(out *ClusterSpec) {
 	*out = *in
 	in.Storage.DeepCopyInto(&out.Storage)
-	in.Placement.DeepCopyInto(&out.Placement)
+	if in.Placement != nil {
+		in, out := &in.Placement, &out.Placement
+		*out = make(v1alpha2.PlacementSpec, len(*in))
+		for key, val := range *in {
+			newVal := new(v1alpha2.Placement)
+			val.DeepCopyInto(newVal)
+			(*out)[key] = *newVal
+		}
+	}
 	out.Network = in.Network
-	in.Resources.DeepCopyInto(&out.Resources)
+	if in.Resources != nil {
+		in, out := &in.Resources, &out.Resources
+		*out = make(v1alpha2.ResourceSpec, len(*in))
+		for key, val := range *in {
+			(*out)[key] = *val.DeepCopy()
+		}
+	}
 	return
 }
 
