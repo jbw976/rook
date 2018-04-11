@@ -27,7 +27,7 @@ import (
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/daemon/agent/flexvolume"
 	"github.com/rook/rook/pkg/daemon/agent/flexvolume/attachment"
-	opcluster "github.com/rook/rook/pkg/operator/cluster"
+	opcluster "github.com/rook/rook/pkg/operator/ceph/cluster"
 	"github.com/rook/rook/pkg/operator/k8sutil"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
@@ -69,7 +69,7 @@ func (c *ClusterController) StartWatch(namespace string, stopCh chan struct{}) e
 	}
 
 	logger.Infof("start watching cluster resources")
-	watcher := opkit.NewWatcher(opcluster.ClusterResource, namespace, resourceHandlerFuncs, c.context.RookClientset.Rook().RESTClient())
+	watcher := opkit.NewWatcher(opcluster.ClusterResource, namespace, resourceHandlerFuncs, c.context.RookClientset.RookV1alpha1().RESTClient())
 	go watcher.Watch(&rookalpha.Cluster{}, stopCh)
 	return nil
 }

@@ -78,7 +78,7 @@ func TestAttach(t *testing.T) {
 
 	err = controller.Attach(opts, &devicePath)
 	assert.Nil(t, err)
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 	assert.Equal(t, 1, len(volumeAttachment.Attachments))
@@ -133,7 +133,7 @@ func TestAttachAlreadyExist(t *testing.T) {
 		},
 	}
 
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -203,7 +203,7 @@ func TestAttachReadOnlyButRWAlreadyExist(t *testing.T) {
 			},
 		},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -262,7 +262,7 @@ func TestAttachRWButROAlreadyExist(t *testing.T) {
 			},
 		},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -330,7 +330,7 @@ func TestMultipleAttachReadOnly(t *testing.T) {
 			},
 		},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -347,7 +347,7 @@ func TestMultipleAttachReadOnly(t *testing.T) {
 	err = controller.Attach(opts, &devicePath)
 	assert.Nil(t, err)
 
-	volAtt, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	volAtt, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 	assert.Equal(t, 2, len(volAtt.Attachments))
@@ -406,7 +406,7 @@ func TestOrphanAttachOriginalPodDoesntExist(t *testing.T) {
 			},
 		},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -423,7 +423,7 @@ func TestOrphanAttachOriginalPodDoesntExist(t *testing.T) {
 	err = controller.Attach(opts, &devicePath)
 	assert.Nil(t, err)
 
-	volAtt, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	volAtt, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, volAtt)
 	assert.Equal(t, 1, len(volAtt.Attachments))
@@ -482,7 +482,7 @@ func TestOrphanAttachOriginalPodNameSame(t *testing.T) {
 		},
 	}
 
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -514,7 +514,7 @@ func TestOrphanAttachOriginalPodNameSame(t *testing.T) {
 	err = controller.Attach(opts, &devicePath)
 	assert.Nil(t, err)
 
-	volAtt, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	volAtt, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, volAtt)
 	assert.Equal(t, 1, len(volAtt.Attachments))
@@ -572,7 +572,7 @@ func TestVolumeAttachmentExistAttach(t *testing.T) {
 			},
 		},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -589,7 +589,7 @@ func TestVolumeAttachmentExistAttach(t *testing.T) {
 	err = controller.Attach(opts, &devicePath)
 	assert.Nil(t, err)
 
-	newAttach, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	newAttach, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, newAttach)
 	// TODO: Check that the volume attach was not updated (can't use ResourceVersion in the fake testing)
@@ -616,7 +616,7 @@ func TestDetach(t *testing.T) {
 		},
 		Attachments: []rookalpha.Attachment{},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -637,7 +637,7 @@ func TestDetach(t *testing.T) {
 	err = controller.Detach(opts, nil)
 	assert.Nil(t, err)
 
-	_, err = context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	_, err = context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.NotNil(t, err)
 	assert.True(t, errors.IsNotFound(err))
 }
@@ -670,7 +670,7 @@ func TestDetachWithAttachmentLeft(t *testing.T) {
 			},
 		},
 	}
-	volumeAttachment, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Create(existingCRD)
+	volumeAttachment, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Create(existingCRD)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumeAttachment)
 
@@ -691,7 +691,7 @@ func TestDetachWithAttachmentLeft(t *testing.T) {
 	err = controller.Detach(opts, nil)
 	assert.Nil(t, err)
 
-	volAttach, err := context.RookClientset.Rook().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
+	volAttach, err := context.RookClientset.RookV1alpha1().VolumeAttachments("rook-system").Get("pvc-123", metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, volAttach)
 }

@@ -28,6 +28,22 @@ func TestResolveNodeNotExist(t *testing.T) {
 	assert.Nil(t, node)
 }
 
+func TestResolveNodeDefaultValues(t *testing.T) {
+	// a node with no properties and none defined in the cluster storage spec should get the default values
+	storageSpec := StorageScopeSpec{
+		Nodes: []Node{
+			{Name: "node1"}, // node gets nothing but its name set
+		},
+	}
+
+	node := storageSpec.ResolveNode("node1")
+	assert.NotNil(t, node)
+	assert.Equal(t, "", node.Selection.DeviceFilter)
+	assert.False(t, node.Selection.GetUseAllDevices())
+	assert.Equal(t, "", node.Location)
+	assert.Equal(t, storageSpec.Directories, node.Directories)
+}
+
 func TestResolveNodeInherentFromCluster(t *testing.T) {
 	// a node with no properties defined should inherit them from the cluster storage spec
 	storageSpec := StorageScopeSpec{
@@ -53,20 +69,41 @@ func TestResolveNodeInherentFromCluster(t *testing.T) {
 	assert.Equal(t, []Directory{{Path: "/rook/datadir1"}}, node.Directories)
 }
 
-func TestResolveNodeDefaultValues(t *testing.T) {
-	// a node with no properties and none defined in the cluster storage spec should get the default values
+func TestResolveNodeSpecificProperties(t *testing.T) {
+	// a node with its own specific properties defined should keep those values, regardless of what the global cluster config is
 	storageSpec := StorageScopeSpec{
+		Location: "root=default,row=a,rack=a2,chassis=a2a,host=a2a1",
+		Selection: Selection{
+			DeviceFilter: "^sd.",
+			Directories:  []Directory{{Path: "/rook/datadir1"}},
+		},
+		Config: map[string]string{
+			"foo": "bar",
+			"baz": "biz",
+		},
 		Nodes: []Node{
-			{Name: "node1"}, // node gets nothing but its name set
+			{
+				Name: "node1", // node has its own config that should override cluster level config
+				Selection: Selection{
+					DeviceFilter: "nvme.*",
+					Directories:  []Directory{{Path: "/rook/node1data"}},
+				},
+				Location: "host=node1",
+				Config: map[string]string{
+					"foo": "node1bar",
+				},
+			},
 		},
 	}
 
 	node := storageSpec.ResolveNode("node1")
 	assert.NotNil(t, node)
-	assert.Equal(t, "", node.Selection.DeviceFilter)
 	assert.False(t, node.Selection.GetUseAllDevices())
-	assert.Equal(t, "", node.Location)
-	assert.Equal(t, storageSpec.Directories, node.Directories)
+	assert.Equal(t, "nvme.*", node.Selection.DeviceFilter)
+	assert.Equal(t, []Directory{{Path: "/rook/node1data"}}, node.Directories)
+	assert.Equal(t, "host=node1", node.Location)
+	assert.Equal(t, "node1bar", node.Config["foo"])
+	assert.Equal(t, "biz", node.Config["baz"])
 }
 
 func TestResolveNodeUseAllDevices(t *testing.T) {

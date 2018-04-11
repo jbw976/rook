@@ -16,14 +16,14 @@ This guide assumes you have created a Rook cluster as explained in the main [Qui
 
 Before Rook can start provisioning storage, a StorageClass and its storage pool need to be created. This is needed for Kubernetes to interoperate with Rook for provisioning persistent volumes. For more options on pools, see the documentation on [creating storage pools](pool-crd.md).
 
-Save this storage class definition as `rook-storageclass.yaml`:
+Save this storage class definition as `storageclass.yaml`:
 
 ```yaml
-apiVersion: rook.io/v1alpha1
+apiVersion: ceph.rook.io/v1alpha1
 kind: Pool
 metadata:
   name: replicapool
-  namespace: rook
+  namespace: rook-ceph
 spec:
   replicated:
     size: 3
@@ -32,14 +32,15 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
    name: rook-block
-provisioner: rook.io/block
+provisioner: ceph.rook.io/block
 parameters:
   pool: replicapool
+  clusterName: rook-ceph
 ```
 
 Create the storage class.
 ```bash
-kubectl create -f rook-storageclass.yaml
+kubectl create -f storageclass.yaml
 ```
 
 ## Consume the storage: Wordpress sample
@@ -63,7 +64,7 @@ mysql-pv-claim   Bound     pvc-95402dbc-efc0-11e6-bc9a-0cc47a3459ee   20Gi      
 wp-pv-claim      Bound     pvc-39e43169-efc1-11e6-bc9a-0cc47a3459ee   20Gi       RWO           1m
 ```
 
-Once the wordpress and mysql pods are in the `Running` state, get the cluster IP of the wordpress app and enter it in your brower:
+Once the wordpress and mysql pods are in the `Running` state, get the cluster IP of the wordpress app and enter it in your browser:
 
 ```bash
 $ kubectl get svc wordpress
@@ -86,6 +87,6 @@ To clean up all the artifacts created by the block demo:
 ```
 kubectl delete -f wordpress.yaml
 kubectl delete -f mysql.yaml
-kubectl delete -n rook pool replicapool
+kubectl delete -n rook-ceph pool replicapool
 kubectl delete storageclass rook-block
 ```

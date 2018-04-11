@@ -27,7 +27,7 @@ import (
 	"github.com/google/uuid"
 	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/clusterd"
-	"github.com/rook/rook/pkg/operator/cluster/ceph/osd/config"
+	"github.com/rook/rook/pkg/operator/ceph/cluster/osd/config"
 	exectest "github.com/rook/rook/pkg/util/exec/test"
 	"github.com/rook/rook/pkg/util/sys"
 	"github.com/stretchr/testify/assert"

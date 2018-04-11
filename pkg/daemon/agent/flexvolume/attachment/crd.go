@@ -71,23 +71,23 @@ func New(context *clusterd.Context) (Attachment, error) {
 
 // Get queries the VolumeAttachment CRD from Kubernetes
 func (c *crd) Get(namespace, name string) (*rookalpha.VolumeAttachment, error) {
-	return c.context.RookClientset.Rook().VolumeAttachments(namespace).Get(name, metav1.GetOptions{})
+	return c.context.RookClientset.RookV1alpha1().VolumeAttachments(namespace).Get(name, metav1.GetOptions{})
 }
 
 // List lists all the volume attachment CRD resources in the given namespace
 func (c *crd) List(namespace string) (*rookalpha.VolumeAttachmentList, error) {
-	return c.context.RookClientset.Rook().VolumeAttachments(namespace).List(metav1.ListOptions{})
+	return c.context.RookClientset.RookV1alpha1().VolumeAttachments(namespace).List(metav1.ListOptions{})
 }
 
 // Create creates the volume attach CRD resource in Kubernetes
 func (c *crd) Create(volumeAttachment *rookalpha.VolumeAttachment) error {
-	_, err := c.context.RookClientset.Rook().VolumeAttachments(volumeAttachment.Namespace).Create(volumeAttachment)
+	_, err := c.context.RookClientset.RookV1alpha1().VolumeAttachments(volumeAttachment.Namespace).Create(volumeAttachment)
 	return err
 }
 
 // Update updates VolumeAttachment resource
 func (c *crd) Update(volumeAttachment *rookalpha.VolumeAttachment) error {
-	_, err := c.context.RookClientset.Rook().VolumeAttachments(volumeAttachment.Namespace).Update(volumeAttachment)
+	_, err := c.context.RookClientset.RookV1alpha1().VolumeAttachments(volumeAttachment.Namespace).Update(volumeAttachment)
 	if err != nil {
 		logger.Errorf("failed to update VolumeAttachment CRD. %+v", err)
 		return err
@@ -98,5 +98,5 @@ func (c *crd) Update(volumeAttachment *rookalpha.VolumeAttachment) error {
 
 // Delete deletes the volume attach CRD resource in Kubernetes
 func (c *crd) Delete(namespace, name string) error {
-	return c.context.RookClientset.Rook().VolumeAttachments(namespace).Delete(name, &metav1.DeleteOptions{})
+	return c.context.RookClientset.RookV1alpha1().VolumeAttachments(namespace).Delete(name, &metav1.DeleteOptions{})
 }

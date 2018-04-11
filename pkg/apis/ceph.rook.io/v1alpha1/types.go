@@ -68,7 +68,7 @@ type ClusterSpec struct {
 
 	MetadataDevice string `json:"metadataDevice,omitempty"`
 
-	StoreConfig string `json:"storeConfig,omitempty"`
+	StoreConfig StoreConfig `json:"storeConfig,omitempty"`
 }
 
 type ClusterStatus struct {
@@ -90,6 +90,11 @@ type StoreConfig struct {
 	WalSizeMB      int    `json:"walSizeMB,omitempty"`
 	DatabaseSizeMB int    `json:"databaseSizeMB,omitempty"`
 	JournalSizeMB  int    `json:"journalSizeMB,omitempty"`
+}
+
+type Node struct {
+	rook.Node
+	StoreConfig StoreConfig
 }
 
 // +genclient

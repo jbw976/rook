@@ -27,7 +27,7 @@ import (
 	cephclient "github.com/rook/rook/pkg/daemon/ceph/client"
 	cephmon "github.com/rook/rook/pkg/daemon/ceph/mon"
 	"github.com/rook/rook/pkg/daemon/ceph/util"
-	"github.com/rook/rook/pkg/operator/cluster/ceph/mon"
+	"github.com/rook/rook/pkg/operator/ceph/cluster/mon"
 	"github.com/rook/rook/pkg/util/sys"
 )
 
