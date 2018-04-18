@@ -18,13 +18,15 @@ limitations under the License.
 package file
 
 import (
-	"fmt"
 	"reflect"
+
+	"github.com/rook/rook/pkg/operator/ceph/pool"
 
 	"github.com/coreos/pkg/capnslog"
 	opkit "github.com/rook/operator-kit"
 	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	rookv1alpha1 "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	rookv1alpha2 "github.com/rook/rook/pkg/apis/rook.io/v1alpha2"
 	"github.com/rook/rook/pkg/clusterd"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -52,10 +54,10 @@ var FilesystemResource = opkit.CustomResource{
 var FilesystemResourceLegacy = opkit.CustomResource{
 	Name:    customResourceName,
 	Plural:  customResourceNamePlural,
-	Group:   rookalpha.CustomResourceGroup,
-	Version: rookalpha.Version,
+	Group:   rookv1alpha1.CustomResourceGroup,
+	Version: rookv1alpha1.Version,
 	Scope:   apiextensionsv1beta1.NamespaceScoped,
-	Kind:    reflect.TypeOf(rookalpha.Filesystem{}).Name(),
+	Kind:    reflect.TypeOf(rookv1alpha1.Filesystem{}).Name(),
 }
 
 // FilesystemController represents a controller for file system custom resources
@@ -203,11 +205,8 @@ func (c *FilesystemController) getFilesystemObject(obj interface{}) (filesystem 
 
 	// type assertion to current filesystem type failed, try instead asserting to the legacy filesystem type
 	// then convert it to the current filesystem type
-	filesystemLegacy := obj.(*rookalpha.Filesystem).DeepCopy()
-	filesystem, err = convertLegacyFilesystem(filesystemLegacy)
-	if err != nil {
-		return nil, true, fmt.Errorf("failed to convert legacy filesystem object. err: %+v. legacy object: %+v", err, filesystemLegacy)
-	}
+	filesystemLegacy := obj.(*rookv1alpha1.Filesystem).DeepCopy()
+	filesystem = convertLegacyFilesystem(filesystemLegacy)
 
 	return filesystem, true, nil
 }
@@ -240,10 +239,34 @@ func (c *FilesystemController) migrateFilesystemObject(filesystemToMigrate *ceph
 	return err
 }
 
-func convertLegacyFilesystem(legacyFilesystem *rookalpha.Filesystem) (*cephv1alpha1.Filesystem, error) {
+func convertLegacyFilesystem(legacyFilesystem *rookv1alpha1.Filesystem) *cephv1alpha1.Filesystem {
 	if legacyFilesystem == nil {
-		return nil, nil
+		return nil
 	}
 
-	return nil, fmt.Errorf("converting legacy filesystem not yet implemented")
+	legacySpec := legacyFilesystem.Spec
+
+	dataPools := make([]cephv1alpha1.PoolSpec, len(legacySpec.DataPools))
+	for i, dp := range legacySpec.DataPools {
+		dataPools[i] = pool.ConvertLegacyPoolSpec(dp)
+	}
+
+	filesystem := &cephv1alpha1.Filesystem{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      legacyFilesystem.Name,
+			Namespace: legacyFilesystem.Namespace,
+		},
+		Spec: cephv1alpha1.FilesystemSpec{
+			MetadataPool: pool.ConvertLegacyPoolSpec(legacySpec.MetadataPool),
+			DataPools:    dataPools,
+			MetadataServer: cephv1alpha1.MetadataServerSpec{
+				ActiveCount:   legacySpec.MetadataServer.ActiveCount,
+				ActiveStandby: legacySpec.MetadataServer.ActiveStandby,
+				Placement:     rookv1alpha2.ConvertLegacyPlacement(legacySpec.MetadataServer.Placement),
+				Resources:     legacySpec.MetadataServer.Resources,
+			},
+		},
+	}
+
+	return filesystem
 }

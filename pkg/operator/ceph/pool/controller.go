@@ -304,12 +304,7 @@ func (c *PoolController) getPoolObject(obj interface{}) (pool *cephv1alpha1.Pool
 	// type assertion to current pool type failed, try instead asserting to the legacy pool type
 	// then convert it to the current pool type
 	poolLegacy := obj.(*rookalpha.Pool).DeepCopy()
-	pool, err = convertLegacyPool(poolLegacy)
-	if err != nil {
-		return nil, true, fmt.Errorf("failed to convert legacy pool object. err: %+v. legacy object: %+v", err, poolLegacy)
-	}
-
-	return pool, true, nil
+	return convertLegacyPool(poolLegacy), true, nil
 }
 
 func (c *PoolController) migratePoolObject(poolToMigrate *cephv1alpha1.Pool) error {
@@ -340,10 +335,33 @@ func (c *PoolController) migratePoolObject(poolToMigrate *cephv1alpha1.Pool) err
 	return err
 }
 
-func convertLegacyPool(legacyPool *rookalpha.Pool) (*cephv1alpha1.Pool, error) {
+func ConvertLegacyPoolSpec(legacySpec rookalpha.PoolSpec) cephv1alpha1.PoolSpec {
+	return cephv1alpha1.PoolSpec{
+		FailureDomain: legacySpec.FailureDomain,
+		CrushRoot:     legacySpec.CrushRoot,
+		Replicated: cephv1alpha1.ReplicatedSpec{
+			Size: legacySpec.Replicated.Size,
+		},
+		ErasureCoded: cephv1alpha1.ErasureCodedSpec{
+			DataChunks:   legacySpec.ErasureCoded.DataChunks,
+			CodingChunks: legacySpec.ErasureCoded.CodingChunks,
+			Algorithm:    legacySpec.ErasureCoded.Algorithm,
+		},
+	}
+}
+
+func convertLegacyPool(legacyPool *rookalpha.Pool) *cephv1alpha1.Pool {
 	if legacyPool == nil {
-		return nil, nil
+		return nil
 	}
 
-	return nil, fmt.Errorf("converting legacy pool not yet implemented")
+	pool := &cephv1alpha1.Pool{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      legacyPool.Name,
+			Namespace: legacyPool.Namespace,
+		},
+		Spec: ConvertLegacyPoolSpec(legacyPool.Spec),
+	}
+
+	return pool
 }

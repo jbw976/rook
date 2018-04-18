@@ -24,6 +24,7 @@ import (
 
 	"github.com/coreos/pkg/capnslog"
 	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
+	rookv1alpha1 "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/daemon/agent/flexvolume/attachment"
 	opcluster "github.com/rook/rook/pkg/operator/ceph/cluster"
 	"github.com/rook/rook/pkg/operator/k8sutil"
@@ -52,7 +53,7 @@ var clusterAccessRules = []v1beta1.PolicyRule{
 		Verbs:     []string{"get", "list"},
 	},
 	{
-		APIGroups: []string{cephv1alpha1.CustomResourceGroup},
+		APIGroups: []string{rookv1alpha1.CustomResourceGroup},
 		Resources: []string{attachment.CustomResourceNamePlural},
 		Verbs:     []string{"get", "list", "create", "delete", "update"},
 	},

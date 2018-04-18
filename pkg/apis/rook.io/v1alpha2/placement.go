@@ -16,6 +16,7 @@ limitations under the License.
 package v1alpha2
 
 import (
+	rookv1alpha1 "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
 	"k8s.io/api/core/v1"
 )
 
@@ -61,4 +62,19 @@ func (p Placement) Merge(with Placement) Placement {
 		ret.Tolerations = with.Tolerations
 	}
 	return ret
+}
+
+func ConvertLegacyPlacement(legacyPlacement rookv1alpha1.Placement) Placement {
+	p := Placement{
+		NodeAffinity:    legacyPlacement.NodeAffinity,
+		PodAffinity:     legacyPlacement.PodAffinity,
+		PodAntiAffinity: legacyPlacement.PodAntiAffinity,
+		Tolerations:     make([]v1.Toleration, len(legacyPlacement.Tolerations)),
+	}
+
+	for i := range legacyPlacement.Tolerations {
+		p.Tolerations[i] = legacyPlacement.Tolerations[i]
+	}
+
+	return p
 }

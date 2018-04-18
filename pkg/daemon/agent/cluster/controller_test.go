@@ -25,7 +25,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
+	rookv1alpha1 "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
 	"github.com/rook/rook/pkg/clusterd"
 	"github.com/rook/rook/pkg/daemon/agent/flexvolume"
 	"github.com/rook/rook/pkg/daemon/agent/flexvolume/attachment"
@@ -54,14 +55,14 @@ func TestClusterDeleteSingleAttachment(t *testing.T) {
 	}
 
 	// set up an existing volume attachment CRD that belongs to this node and the cluster we will delete later
-	existingVolAttachList := &rookalpha.VolumeAttachmentList{
-		Items: []rookalpha.VolumeAttachment{
+	existingVolAttachList := &rookv1alpha1.VolumeAttachmentList{
+		Items: []rookv1alpha1.VolumeAttachment{
 			{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      pvName,
 					Namespace: rookSystemNamespace,
 				},
-				Attachments: []rookalpha.Attachment{
+				Attachments: []rookv1alpha1.Attachment{
 					{
 						Node:        nodeName,
 						MountDir:    getMockMountDir(podName, pvName),
@@ -78,7 +79,7 @@ func TestClusterDeleteSingleAttachment(t *testing.T) {
 
 	flexvolumeManager := &manager.FakeVolumeManager{}
 	volumeAttachmentController := &attachment.MockAttachment{
-		MockList: func(namespace string) (*rookalpha.VolumeAttachmentList, error) {
+		MockList: func(namespace string) (*rookv1alpha1.VolumeAttachmentList, error) {
 			return existingVolAttachList, nil
 		},
 		MockDelete: func(namespace, name string) error {
@@ -111,7 +112,7 @@ func TestClusterDeleteSingleAttachment(t *testing.T) {
 	// tell the cluster controller that a cluster has been deleted.  the controller will perform the cleanup
 	// async, but block and wait for it all to complete before returning to us, so there should be no races
 	// with the asserts later on.
-	clusterToDelete := &rookalpha.Cluster{ObjectMeta: metav1.ObjectMeta{Namespace: clusterName}}
+	clusterToDelete := &cephv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Namespace: clusterName}}
 	controller.handleClusterDelete(clusterToDelete, time.Millisecond)
 
 	// detaching, removing the attachment from the CRD, and deleting the CRD should have been called
@@ -139,14 +140,14 @@ func TestClusterDeleteAttachedToOtherNode(t *testing.T) {
 	}
 
 	// set up an existing volume attachment CRD that belongs to another node
-	existingVolAttachList := &rookalpha.VolumeAttachmentList{
-		Items: []rookalpha.VolumeAttachment{
+	existingVolAttachList := &rookv1alpha1.VolumeAttachmentList{
+		Items: []rookv1alpha1.VolumeAttachment{
 			{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      pvName,
 					Namespace: rookSystemNamespace,
 				},
-				Attachments: []rookalpha.Attachment{
+				Attachments: []rookv1alpha1.Attachment{
 					{
 						Node:        "some other node",
 						MountDir:    getMockMountDir(podName, pvName),
@@ -161,7 +162,7 @@ func TestClusterDeleteAttachedToOtherNode(t *testing.T) {
 
 	flexvolumeManager := &manager.FakeVolumeManager{}
 	volumeAttachmentController := &attachment.MockAttachment{
-		MockList: func(namespace string) (*rookalpha.VolumeAttachmentList, error) {
+		MockList: func(namespace string) (*rookv1alpha1.VolumeAttachmentList, error) {
 			return existingVolAttachList, nil
 		},
 	}
@@ -175,7 +176,7 @@ func TestClusterDeleteAttachedToOtherNode(t *testing.T) {
 	controller := NewClusterController(context, flexvolumeController, volumeAttachmentController, flexvolumeManager)
 
 	// delete the cluster, nothing should happen
-	clusterToDelete := &rookalpha.Cluster{ObjectMeta: metav1.ObjectMeta{Namespace: clusterName}}
+	clusterToDelete := &cephv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Namespace: clusterName}}
 	controller.handleClusterDelete(clusterToDelete, time.Millisecond)
 
 	// since the volume attachment was on a different node, nothing should have been called
@@ -202,14 +203,14 @@ func TestClusterDeleteMultiAttachmentRace(t *testing.T) {
 	}
 
 	// set up an existing volume attachment CRD that has two pods using the same underlying volume.
-	existingVolAttachList := &rookalpha.VolumeAttachmentList{
-		Items: []rookalpha.VolumeAttachment{
+	existingVolAttachList := &rookv1alpha1.VolumeAttachmentList{
+		Items: []rookv1alpha1.VolumeAttachment{
 			{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      pvName,
 					Namespace: rookSystemNamespace,
 				},
-				Attachments: []rookalpha.Attachment{
+				Attachments: []rookv1alpha1.Attachment{
 					{
 						Node:        nodeName,
 						MountDir:    getMockMountDir(podName1, pvName),
@@ -231,7 +232,7 @@ func TestClusterDeleteMultiAttachmentRace(t *testing.T) {
 
 	deleteCount := 0
 	volumeAttachmentController := &attachment.MockAttachment{
-		MockList: func(namespace string) (*rookalpha.VolumeAttachmentList, error) {
+		MockList: func(namespace string) (*rookv1alpha1.VolumeAttachmentList, error) {
 			return existingVolAttachList, nil
 		},
 		MockDelete: func(namespace, name string) error {
@@ -274,7 +275,7 @@ func TestClusterDeleteMultiAttachmentRace(t *testing.T) {
 
 	// kick off the cluster deletion process
 	controller := NewClusterController(context, flexvolumeController, volumeAttachmentController, flexvolumeManager)
-	clusterToDelete := &rookalpha.Cluster{ObjectMeta: metav1.ObjectMeta{Namespace: clusterName}}
+	clusterToDelete := &cephv1alpha1.Cluster{ObjectMeta: metav1.ObjectMeta{Namespace: clusterName}}
 	controller.handleClusterDelete(clusterToDelete, time.Millisecond)
 
 	// both attachments should have made it all the way through the clean up process, meaing that Delete
