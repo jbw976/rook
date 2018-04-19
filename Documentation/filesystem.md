@@ -109,7 +109,7 @@ spec:
       volumes:
       - name: image-store
         flexVolume:
-          driver: ceph.rook.io/rook
+          driver: rook.io/rook
           fsType: ceph
           options:
             fsName: myfs # name of the filesystem specified in the filesystem CRD.
@@ -118,7 +118,7 @@ spec:
             # path: /some/path/inside/cephfs
 ```
 
-You now have a docker registry which is HA with persistent storage.
+After creating it with `kubectl create -f kube-registry.yaml`, you now have a docker registry which is HA with persistent storage.
 
 #### Kernel Version Requirement
 If the Rook cluster has more than one filesystem and the application pod is scheduled to a node with kernel version older than 4.7, inconsistent results may arise since kernels older than 4.7 do not support specifying filesystem namespaces.

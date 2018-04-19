@@ -15,7 +15,7 @@ This guide assumes you have created a Rook cluster as explained in the main [Kub
 ## Create an Object Store
 
 Now we will create the object store, which starts the RGW service in the cluster with the S3 API.
-Specify your desired settings for the object store in the `rook-object.yaml`. For more details on the settings see the [Object Store CRD](object-store-crd.md).
+Specify your desired settings for the object store in the `object.yaml`. For more details on the settings see the [Object Store CRD](object-store-crd.md).
 
 ```yaml
 apiVersion: ceph.rook.io/v1alpha1
@@ -43,7 +43,7 @@ spec:
 When the object store is created the Rook operator will create all the pools and other resources necessary to start the service. This may take a minute to complete.
 ```bash
 # Create the object store
-kubectl create -f rook-object.yaml
+kubectl create -f object.yaml
 
 # To confirm the object store is configured, wait for the rgw pod to start
 kubectl -n rook-ceph get pod -l app=rook-ceph-rgw
@@ -174,9 +174,9 @@ kubectl create -f rgw-external.yaml
 See both rgw services running and notice what port the external service is running on:
 ```bash
 $ kubectl -n rook-ceph get service rook-ceph-rgw-my-store rook-ceph-rgw-my-store-external
-NAME                              CLUSTER-IP   EXTERNAL-IP   PORT(S)           AGE
-rook-ceph-rgw-my-store            10.0.0.83    <none>        80/TCP            21m
-rook-ceph-rgw-my-store-external   10.0.0.26    <nodes>       80:30041/TCP      1m
+NAME                              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+rook-ceph-rgw-my-store            ClusterIP   10.104.82.228    <none>        80/TCP         4m
+rook-ceph-rgw-my-store-external   NodePort    10.111.113.237   <none>        80:31536/TCP   39s
 ```
 
-Internally the rgw service is running on port `80`. The external port in this case is `30041`. Now you can access the object store from anywhere! All you need is the hostname for any machine in the cluster, the external port, and the user credentials.
+Internally the rgw service is running on port `80`. The external port in this case is `31536`. Now you can access the object store from anywhere! All you need is the hostname for any machine in the cluster, the external port, and the user credentials.

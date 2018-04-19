@@ -29,7 +29,6 @@ type CephV1alpha1Interface interface {
 	FilesystemsGetter
 	ObjectStoresGetter
 	PoolsGetter
-	VolumeAttachmentsGetter
 }
 
 // CephV1alpha1Client is used to interact with features provided by the ceph.rook.io group.
@@ -51,10 +50,6 @@ func (c *CephV1alpha1Client) ObjectStores(namespace string) ObjectStoreInterface
 
 func (c *CephV1alpha1Client) Pools(namespace string) PoolInterface {
 	return newPools(c, namespace)
-}
-
-func (c *CephV1alpha1Client) VolumeAttachments(namespace string) VolumeAttachmentInterface {
-	return newVolumeAttachments(c, namespace)
 }
 
 // NewForConfig creates a new CephV1alpha1Client for the given config.

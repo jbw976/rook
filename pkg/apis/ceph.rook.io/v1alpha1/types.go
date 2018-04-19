@@ -152,33 +152,6 @@ type ErasureCodedSpec struct {
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type VolumeAttachment struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata"`
-	Attachments       []Attachment `json:"attachments"`
-}
-
-type Attachment struct {
-	Node         string `json:"node"`
-	PodNamespace string `json:"podNamespace"`
-	PodName      string `json:"podName"`
-	ClusterName  string `json:"clusterName"`
-	MountDir     string `json:"mountDir"`
-	ReadOnly     bool   `json:"readOnly"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type VolumeAttachmentList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata"`
-	Items           []VolumeAttachment `json:"items"`
-}
-
-// +genclient
-// +genclient:noStatus
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 type Filesystem struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`

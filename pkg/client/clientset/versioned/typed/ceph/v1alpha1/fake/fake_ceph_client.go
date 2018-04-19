@@ -42,10 +42,6 @@ func (c *FakeCephV1alpha1) Pools(namespace string) v1alpha1.PoolInterface {
 	return &FakePools{c, namespace}
 }
 
-func (c *FakeCephV1alpha1) VolumeAttachments(namespace string) v1alpha1.VolumeAttachmentInterface {
-	return &FakeVolumeAttachments{c, namespace}
-}
-
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeCephV1alpha1) RESTClient() rest.Interface {

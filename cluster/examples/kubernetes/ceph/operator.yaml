@@ -62,9 +62,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: volumeattachments.ceph.rook.io
+  name: volumeattachments.rook.io
 spec:
-  group: ceph.rook.io
+  group: rook.io
   names:
     kind: VolumeAttachment
     listKind: VolumeAttachmentList
@@ -184,7 +184,7 @@ spec:
       serviceAccountName: rook-ceph-operator
       containers:
       - name: rook-ceph-operator
-        image: rook/rook:master
+        image: rook/ceph:master
         args: ["ceph", "operator"]
         env:
         # To disable RBAC, uncomment the following:

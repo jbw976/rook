@@ -23,5 +23,3 @@ type FilesystemExpansion interface{}
 type ObjectStoreExpansion interface{}
 
 type PoolExpansion interface{}
-
-type VolumeAttachmentExpansion interface{}
