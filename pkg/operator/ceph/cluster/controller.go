@@ -479,61 +479,6 @@ func (c *ClusterController) handleDelete(cluster *cephv1alpha1.Cluster, retryInt
 	return nil
 }
 
-func (c *ClusterController) getClusterObject(obj interface{}) (cluster *cephv1alpha1.Cluster, migrationNeeded bool, err error) {
-	var ok bool
-	cluster, ok = obj.(*cephv1alpha1.Cluster)
-	if ok {
-		// the cluster object is of the latest type, simply return it
-		return cluster.DeepCopy(), false, nil
-	}
-
-	// type assertion to current cluster type failed, try instead asserting to the legacy cluster type
-	// then convert it to the current cluster type
-	clusterLegacy := obj.(*rookv1alpha1.Cluster).DeepCopy()
-	cluster, err = convertLegacyCluster(clusterLegacy)
-	if err != nil {
-		return nil, true, fmt.Errorf("failed to convert legacy cluster object. err: %+v. legacy object: %+v", err, clusterLegacy)
-	}
-
-	return cluster, true, nil
-}
-
-func (c *ClusterController) migrateClusterObject(clusterToMigrate *cephv1alpha1.Cluster) error {
-	logger.Infof("migrating legacy cluster %s in namespace %s", clusterToMigrate.Name, clusterToMigrate.Namespace)
-
-	_, err := c.context.RookClientset.CephV1alpha1().Clusters(clusterToMigrate.Namespace).Get(clusterToMigrate.Name, metav1.GetOptions{})
-	if err == nil {
-		// cluster of current type with same name/namespace already exists, don't overwrite it
-		logger.Warningf("cluster object %s in namespace %s already exists, will not overwrite with migrated legacy cluster.",
-			clusterToMigrate.Name, clusterToMigrate.Namespace)
-	} else {
-		if !errors.IsAlreadyExists(err) {
-			return err
-		}
-
-		// cluster of current type does not already exist, create it now to complete the migration
-		_, err = c.context.RookClientset.CephV1alpha1().Clusters(clusterToMigrate.Namespace).Create(clusterToMigrate)
-		if err != nil {
-			return err
-		}
-
-		logger.Infof("completed migration of legacy cluster %s in namespace %s", clusterToMigrate.Name, clusterToMigrate.Namespace)
-	}
-
-	// delete the legacy cluster instance, it should not be used anymore now that a migrated instance of the current type exists
-	logger.Infof("deleting legacy cluster %s in namespace %s", clusterToMigrate.Name, clusterToMigrate.Namespace)
-	err = c.context.RookClientset.RookV1alpha1().Clusters(clusterToMigrate.Namespace).Delete(clusterToMigrate.Name, nil)
-	return err
-}
-
-func convertLegacyCluster(legacyCluster *rookv1alpha1.Cluster) (*cephv1alpha1.Cluster, error) {
-	if legacyCluster == nil {
-		return nil, nil
-	}
-
-	return nil, fmt.Errorf("converting legacy cluster not yet implemented")
-}
-
 func (c *ClusterController) updateClusterStatus(namespace, name string, state cephv1alpha1.ClusterState, message string) error {
 	// get the most recent cluster CRD object
 	cluster, err := c.context.RookClientset.CephV1alpha1().Clusters(namespace).Get(name, metav1.GetOptions{})

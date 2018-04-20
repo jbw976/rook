@@ -18,14 +18,15 @@ limitations under the License.
 package object
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/coreos/pkg/capnslog"
 	opkit "github.com/rook/operator-kit"
 	cephv1alpha1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1alpha1"
-	rookalpha "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	rookv1alpha1 "github.com/rook/rook/pkg/apis/rook.io/v1alpha1"
+	rookv1alpha2 "github.com/rook/rook/pkg/apis/rook.io/v1alpha2"
 	"github.com/rook/rook/pkg/clusterd"
+	"github.com/rook/rook/pkg/operator/ceph/pool"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,10 +53,10 @@ var ObjectStoreResource = opkit.CustomResource{
 var ObjectStoreResourceLegacy = opkit.CustomResource{
 	Name:    customResourceName,
 	Plural:  customResourceNamePlural,
-	Group:   rookalpha.CustomResourceGroup,
-	Version: rookalpha.Version,
+	Group:   rookv1alpha1.CustomResourceGroup,
+	Version: rookv1alpha1.Version,
 	Scope:   apiextensionsv1beta1.NamespaceScoped,
-	Kind:    reflect.TypeOf(rookalpha.ObjectStore{}).Name(),
+	Kind:    reflect.TypeOf(rookv1alpha1.ObjectStore{}).Name(),
 }
 
 // ObjectStoreController represents a controller object for object store custom resources
@@ -215,11 +216,8 @@ func (c *ObjectStoreController) getObjectStoreObject(obj interface{}) (objectsto
 
 	// type assertion to current objectstore type failed, try instead asserting to the legacy objectstore type
 	// then convert it to the current objectstore type
-	objectstoreLegacy := obj.(*rookalpha.ObjectStore).DeepCopy()
-	objectstore, err = convertLegacyObjectStore(objectstoreLegacy)
-	if err != nil {
-		return nil, true, fmt.Errorf("failed to convert legacy objectstore object. err: %+v. legacy object: %+v", err, objectstoreLegacy)
-	}
+	objectstoreLegacy := obj.(*rookv1alpha1.ObjectStore).DeepCopy()
+	objectstore = convertLegacyObjectStore(objectstoreLegacy)
 
 	return objectstore, true, nil
 }
@@ -252,10 +250,32 @@ func (c *ObjectStoreController) migrateObjectStoreObject(objectstoreToMigrate *c
 	return err
 }
 
-func convertLegacyObjectStore(legacyObjectStore *rookalpha.ObjectStore) (*cephv1alpha1.ObjectStore, error) {
+func convertLegacyObjectStore(legacyObjectStore *rookv1alpha1.ObjectStore) *cephv1alpha1.ObjectStore {
 	if legacyObjectStore == nil {
-		return nil, nil
+		return nil
 	}
 
-	return nil, fmt.Errorf("converting legacy objectstore not yet implemented")
+	legacySpec := legacyObjectStore.Spec
+
+	objectStore := &cephv1alpha1.ObjectStore{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      legacyObjectStore.Name,
+			Namespace: legacyObjectStore.Namespace,
+		},
+		Spec: cephv1alpha1.ObjectStoreSpec{
+			MetadataPool: pool.ConvertLegacyPoolSpec(legacySpec.MetadataPool),
+			DataPool:     pool.ConvertLegacyPoolSpec(legacySpec.DataPool),
+			Gateway: cephv1alpha1.GatewaySpec{
+				Port:              legacySpec.Gateway.Port,
+				SecurePort:        legacySpec.Gateway.SecurePort,
+				Instances:         legacySpec.Gateway.Instances,
+				AllNodes:          legacySpec.Gateway.AllNodes,
+				SSLCertificateRef: legacySpec.Gateway.SSLCertificateRef,
+				Placement:         rookv1alpha2.ConvertLegacyPlacement(legacySpec.Gateway.Placement),
+				Resources:         legacySpec.Gateway.Resources,
+			},
+		},
+	}
+
+	return objectStore
 }
