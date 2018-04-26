@@ -111,6 +111,7 @@ case "${1:-}" in
     # create a link so the default dataDirHostPath will work for this environment
     minikube ssh "sudo mkdir /mnt/sda1/var/lib/rook;sudo ln -s /mnt/sda1/var/lib/rook /var/lib/rook"
     copy_image_to_cluster ${BUILD_REGISTRY}/ceph-amd64 rook/ceph:master
+    copy_image_to_cluster ${BUILD_REGISTRY}/cockroachdb-amd64 rook/cockroachdb:master
     copy_image_to_cluster ${BUILD_REGISTRY}/toolbox-amd64 rook/toolbox:master
     ;;
   down)
@@ -123,6 +124,7 @@ case "${1:-}" in
   update)
     echo "updating the rook images"
     copy_image_to_cluster ${BUILD_REGISTRY}/ceph-amd64 rook/ceph:master
+    copy_image_to_cluster ${BUILD_REGISTRY}/cockroachdb-amd64 rook/cockroachdb:master
     copy_image_to_cluster ${BUILD_REGISTRY}/toolbox-amd64 rook/toolbox:master
     ;;
   restart)
