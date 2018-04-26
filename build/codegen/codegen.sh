@@ -20,9 +20,10 @@ cd ${scriptdir}/../../vendor/k8s.io/code-generator && ./generate-groups.sh \
   all \
   github.com/rook/rook/pkg/client \
   github.com/rook/rook/pkg/apis \
-  "rook.io:v1alpha1,v1alpha2 ceph.rook.io:v1alpha1"
+  "rook.io:v1alpha1,v1alpha2 ceph.rook.io:v1alpha1 minio.rook.io:v1alpha1"
 # this seems busted in the release-1.8 branch
 #  --go-header-file ${SCRIPT_ROOT}/build/codegen/header.txt
+
 
 # workaround https://github.com/openshift/origin/issues/10357
 find ${scriptdir}/../../pkg/client -name "clientset_generated.go" -exec sed -i '' 's/fakePtr := testing.Fake{}/cs := \&Clientset{}/g' {} +

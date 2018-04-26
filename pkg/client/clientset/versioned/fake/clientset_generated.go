@@ -20,6 +20,8 @@ import (
 	clientset "github.com/rook/rook/pkg/client/clientset/versioned"
 	cephv1alpha1 "github.com/rook/rook/pkg/client/clientset/versioned/typed/ceph/v1alpha1"
 	fakecephv1alpha1 "github.com/rook/rook/pkg/client/clientset/versioned/typed/ceph/v1alpha1/fake"
+	miniov1alpha1 "github.com/rook/rook/pkg/client/clientset/versioned/typed/minio/v1alpha1"
+	fakeminiov1alpha1 "github.com/rook/rook/pkg/client/clientset/versioned/typed/minio/v1alpha1/fake"
 	rookv1alpha1 "github.com/rook/rook/pkg/client/clientset/versioned/typed/rook/v1alpha1"
 	fakerookv1alpha1 "github.com/rook/rook/pkg/client/clientset/versioned/typed/rook/v1alpha1/fake"
 	rookv1alpha2 "github.com/rook/rook/pkg/client/clientset/versioned/typed/rook/v1alpha2"
@@ -73,6 +75,16 @@ func (c *Clientset) CephV1alpha1() cephv1alpha1.CephV1alpha1Interface {
 // Ceph retrieves the CephV1alpha1Client
 func (c *Clientset) Ceph() cephv1alpha1.CephV1alpha1Interface {
 	return &fakecephv1alpha1.FakeCephV1alpha1{Fake: &c.Fake}
+}
+
+// MinioV1alpha1 retrieves the MinioV1alpha1Client
+func (c *Clientset) MinioV1alpha1() miniov1alpha1.MinioV1alpha1Interface {
+	return &fakeminiov1alpha1.FakeMinioV1alpha1{Fake: &c.Fake}
+}
+
+// Minio retrieves the MinioV1alpha1Client
+func (c *Clientset) Minio() miniov1alpha1.MinioV1alpha1Interface {
+	return &fakeminiov1alpha1.FakeMinioV1alpha1{Fake: &c.Fake}
 }
 
 // RookV1alpha1 retrieves the RookV1alpha1Client

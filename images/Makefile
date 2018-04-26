@@ -33,10 +33,14 @@ cross.%: base.linux_amd64
 ceph.%: base.%
 	@$(MAKE) -C ceph PLATFORM=$*
 
+minio.%: base.%
+	@$(MAKE) -C minio PLATFORM=$*
+
+# TODO @tallen: add minio?
 toolbox.%: ceph.%
 	@$(MAKE) -C toolbox PLATFORM=$*
 
-do.build.images.%: ceph.% toolbox.% ;
+do.build.images.%: ceph.% minio.% toolbox.% ;
 do.build: do.build.images.$(PLATFORM) ;
 build.all: $(foreach p,$(PLATFORMS), do.build.images.$(p)) ;
 
