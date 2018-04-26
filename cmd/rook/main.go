@@ -20,6 +20,7 @@ import (
 
 	"github.com/rook/rook/cmd/rook/agent"
 	"github.com/rook/rook/cmd/rook/ceph"
+	"github.com/rook/rook/cmd/rook/cockroachdb"
 	rook "github.com/rook/rook/cmd/rook/rook"
 	"github.com/rook/rook/cmd/rook/version"
 )
@@ -35,4 +36,5 @@ func addCommands() {
 	rook.RootCmd.AddCommand(version.VersionCmd)
 	rook.RootCmd.AddCommand(agent.AgentCmd)
 	rook.RootCmd.AddCommand(ceph.Cmd)
+	rook.RootCmd.AddCommand(cockroachdb.Cmd)
 }
