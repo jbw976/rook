@@ -7,7 +7,7 @@ Below is a list of adopters of Rook in **production environments** that have pub
 * [Informatik Computer Cloud (ICC)](https://icc.informatik.haw-hamburg.de/) at the Hamburg Univeristy of Applied Sciences to provide a seamless, fast, flexible and reliable storage service to its staff and students.
 * [Gini](https://gini.net/en/) runs a healthy set of stateful workloads such as Cassandra, Elasticsearch, and CockroachDB that are powered by block storage from Ceph with Rook in order to provide the world's most advanced digital everyday assistant to their users.
 * [Cloudways](https://www.cloudways.com/en/) utilizes the flexibility of Rook's orchestration of Ceph for their users, taking advantage of the fast I/O with block storage as well as multiple readers and writers of shared filesystem storage.
-* [Crowdfox](https://www.crowdfox.com/) believes in strong community projects and are threfore putting their bets on Rook.  They were able to seamlessly migrate VMs between host nodes with zero downtime thanks to Rook.
+* [Crowdfox](https://www.crowdfox.com/crowdfox.html) believes in strong community projects and are threfore putting their bets on Rook.  They were able to seamlessly migrate VMs between host nodes with zero downtime thanks to Rook.
 * [Radio Sound](https://radiosound.com/) uses Rook to power their website and GitLab for their CI/CD pipeline, because of the truly cloud-native experience, like *"a little drop of the Google magic in our own server rack"*.
 * [CyCore Systems](https://www.cycoresys.com/)
 * [Datacom](http://datacom.co.nz/Home.aspx)
