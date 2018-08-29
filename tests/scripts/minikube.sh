@@ -115,7 +115,7 @@ function copy_images() {
 }
 
 # configure minikube
-KUBE_VERSION=${KUBE_VERSION:-"v1.11.0"}
+KUBE_VERSION=${KUBE_VERSION:-"v1.10.0"}
 MEMORY=${MEMORY:-"3000"}
 
 case "${1:-}" in
