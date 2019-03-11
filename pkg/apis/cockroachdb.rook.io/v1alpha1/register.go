@@ -24,8 +24,11 @@ import (
 )
 
 const (
-	CustomResourceGroup = "cockroachdb.rook.io"
-	Version             = "v1alpha1"
+	CustomResourceGroup   = "cockroachdb.rook.io"
+	Version               = "v1alpha1"
+	APIVersion            = CustomResourceGroup + "/" + Version
+	ClusterKind           = "cluster"
+	ClusterKindAPIVersion = ClusterKind + "." + APIVersion
 )
 
 // SchemeGroupVersion is group version used to register these objects

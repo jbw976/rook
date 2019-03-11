@@ -26,9 +26,18 @@ import (
 	opkit "github.com/rook/operator-kit"
 	"github.com/rook/rook/pkg/clusterd"
 	"k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 var logger = capnslog.NewPackageLogger("github.com/rook/rook", "cockroachdb-operator")
+
+// AddToManagerFuncs is a list of functions to add all Controllers to the Manager
+var AddToManagerFuncs []func(manager.Manager, *clusterd.Context) error
+
+func init() {
+	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
+	AddToManagerFuncs = append(AddToManagerFuncs, AddProvisionerToManager)
+}
 
 type Operator struct {
 	context           *clusterd.Context
@@ -68,4 +77,14 @@ func (o *Operator) Run() error {
 			return nil
 		}
 	}
+}
+
+// AddToManager adds all Controllers to the Manager
+func AddToManager(m manager.Manager, context *clusterd.Context) error {
+	for _, f := range AddToManagerFuncs {
+		if err := f(m, context); err != nil {
+			return err
+		}
+	}
+	return nil
 }

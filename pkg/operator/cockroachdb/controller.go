@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	corev1alpha1 "github.com/crossplaneio/crossplane/pkg/apis/core/v1alpha1"
 	opkit "github.com/rook/operator-kit"
 	cockroachdbv1alpha1 "github.com/rook/rook/pkg/apis/cockroachdb.rook.io/v1alpha1"
 	rookv1alpha2 "github.com/rook/rook/pkg/apis/rook.io/v1alpha2"
@@ -174,11 +175,51 @@ func (c *ClusterController) onAdd(obj interface{}) {
 		return true, nil
 	})
 	if err != nil {
-		logger.Errorf("failed to initialize cluster in namespace %s: %+v", cluster.namespace, err)
+		msg := fmt.Sprintf("failed to initialize cluster in namespace %s: %+v", cluster.namespace, err)
+		logger.Error(msg)
+		c.updateClusterStatus(clusterObj.Namespace, clusterObj.Name, cockroachdbv1alpha1.ClusterStateFailed, msg)
 		return
 	}
 
-	logger.Infof("succeeded creating and initializing cluster in namespace %s", cluster.namespace)
+	// create connection secret
+	connSecret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      clusterObj.ConnectionSecretName(),
+			Namespace: clusterObj.Namespace,
+		},
+		Data: map[string][]byte{
+			corev1alpha1.ResourceCredentialsSecretEndpointKey: []byte(createQualifiedReplicaServiceName(0, clusterObj.Namespace)),
+		},
+	}
+	k8sutil.SetOwnerRef(c.context.Clientset, cluster.namespace, &connSecret.ObjectMeta, &cluster.ownerRef)
+	if _, err := c.context.Clientset.CoreV1().Secrets(clusterObj.Namespace).Create(connSecret); err != nil {
+		if !errors.IsAlreadyExists(err) {
+			msg := fmt.Sprintf("failed to create secret for cluster in namespace %s: %+v", cluster.namespace, err)
+			logger.Error(msg)
+			c.updateClusterStatus(clusterObj.Namespace, clusterObj.Name, cockroachdbv1alpha1.ClusterStateFailed, msg)
+			return
+		}
+	}
+
+	msg := fmt.Sprintf("succeeded creating and initializing cluster in namespace %s", cluster.namespace)
+	logger.Info(msg)
+	c.updateClusterStatus(clusterObj.Namespace, clusterObj.Name, cockroachdbv1alpha1.ClusterStateAvailable, msg)
+}
+
+func (c *ClusterController) updateClusterStatus(namespace, name string, state cockroachdbv1alpha1.ClusterState, message string) error {
+	// get the most recent cluster CRD object
+	cluster, err := c.context.RookClientset.CockroachdbV1alpha1().Clusters(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get cluster from namespace %s prior to updating its status: %+v", namespace, err)
+	}
+
+	// update the status on the retrieved cluster object
+	cluster.Status = cockroachdbv1alpha1.ClusterStatus{State: state, Message: message}
+	if _, err := c.context.RookClientset.CockroachdbV1alpha1().Clusters(cluster.Namespace).Update(cluster); err != nil {
+		return fmt.Errorf("failed to update cluster %s status: %+v", cluster.Namespace, err)
+	}
+
+	return nil
 }
 
 func (c *ClusterController) onUpdate(oldObj, newObj interface{}) {
@@ -242,14 +283,14 @@ func (c *ClusterController) createReplicaService(cluster *cluster) error {
 			Namespace: cluster.namespace,
 			Labels:    createAppLabels(),
 			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/path":   "_status/vars",
+				"prometheus.io/port":   strconv.Itoa(int(httpPort)),
 				// Use this annotation in addition to the actual publishNotReadyAddresses
 				// field below because the annotation will stop being respected soon but the
 				// field is broken in some versions of Kubernetes:
 				// https://github.com/kubernetes/kubernetes/issues/58662
 				"service.alpha.kubernetes.io/tolerate-unready-endpoints": "true",
-				"prometheus.io/scrape": "true",
-				"prometheus.io/path":   "_status/vars",
-				"prometheus.io/port":   strconv.Itoa(int(httpPort)),
 			},
 		},
 		Spec: v1.ServiceSpec{
@@ -391,9 +432,9 @@ func createPodSpec(cluster *cluster, containerImage string, httpPort, grpcPort i
 			},
 		},
 		Containers: []v1.Container{createContainer(cluster, containerImage, httpPort, grpcPort)},
+		Volumes:    volumes,
 		// No pre-stop hook is required, a SIGTERM plus some time is all that's needed for graceful shutdown of a node.
 		TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
-		Volumes:                       volumes,
 	}
 }
 

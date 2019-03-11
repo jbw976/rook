@@ -1,0 +1,11 @@
+# Example PostgreSQL resource claim using the local-postgresql resource class
+apiVersion: storage.crossplane.io/v1alpha1
+kind: PostgreSQLInstance
+metadata:
+  name: postgresql
+  namespace: demo
+spec:
+  classReference:
+    name: local-postgresql
+    namespace: rook-cockroachdb-system
+  engineVersion: "9.6"

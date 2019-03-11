@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadgen
-  namespace: rook-cockroachdb
+  namespace: rook-cockroachdb-system
   labels:
     app: loadgen
 spec:

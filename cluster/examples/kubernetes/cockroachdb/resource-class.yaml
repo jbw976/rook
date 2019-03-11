@@ -1,0 +1,19 @@
+# ResourceClass that defines the blueprint for how a "standard" CockroachDB PostgreSQL server
+# should be dynamically provisioned
+apiVersion: core.crossplane.io/v1alpha1
+kind: ResourceClass
+metadata:
+  name: local-postgresql
+  namespace: rook-cockroachdb-system
+parameters:
+  nodeCount: "3"
+  storageSize: "1Gi"
+  httpPort: "8080"
+  grpcPort: "26257"
+  secure: "false"
+  cachePercent: "25"
+  maxSQLMemoryPercent: "25"
+provisioner: cluster.cockroachdb.rook.io/v1alpha1
+providerRef:
+  name: ""
+reclaimPolicy: Delete
