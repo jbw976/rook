@@ -26,3 +26,8 @@ spec:
     enabled: true
   network:
     hostNetwork: false
+  storage:
+    useAllNodes: true
+    useAllDevices: false
+    directories:
+    - path: /var/lib/rook
