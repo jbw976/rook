@@ -117,7 +117,7 @@ func GetRunningPod(clientset kubernetes.Interface) (*v1.Pod, error) {
 		return nil, fmt.Errorf("cannot detect the pod name. Please provide it using the downward API in the manifest file")
 	}
 	podNamespace := os.Getenv(PodNamespaceEnvVar)
-	if podName == "" {
+	if podNamespace == "" {
 		return nil, fmt.Errorf("cannot detect the pod namespace. Please provide it using the downward API in the manifest file")
 	}
 
