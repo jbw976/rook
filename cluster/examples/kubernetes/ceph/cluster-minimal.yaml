@@ -21,13 +21,11 @@ spec:
   dataDirHostPath: /var/lib/rook
   mon:
     count: 1
-    allowMultiplePerNode: false
+    allowMultiplePerNode: true
   dashboard:
     enabled: true
   network:
     hostNetwork: false
   storage:
     useAllNodes: true
-    useAllDevices: false
-    directories:
-    - path: /var/lib/rook
+    useAllDevices: true

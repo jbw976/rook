@@ -1,7 +1,7 @@
 apiVersion: edgefs.rook.io/v1beta1
 kind: S3
 metadata:
-  name: s301
+  name: global-s3
   namespace: rook-edgefs
 spec:
   instances: 1
@@ -23,13 +23,13 @@ spec:
   #    operator: Exists
   #  podAffinity:
   #  podAntiAffinity:
-  #resources:
-  #  limits:
+  resources:
+    limits:
   #    cpu: "2"
-  #    memory: "4Gi"
-  #  requests:
+      memory: "1Gi"
+    requests:
   #    cpu: "2"
-  #    memory: "4Gi"
+      memory: "1Gi"
   # A key value list of annotations
   # A key value list of annotations
   annotations:
