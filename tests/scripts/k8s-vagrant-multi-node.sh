@@ -43,7 +43,7 @@ function copy_images() {
     if [[ "$1" == "" || "$1" == "ceph" ]]; then
       echo "copying ceph images"
       copy_image_to_cluster "${BUILD_REGISTRY}/ceph-amd64" rook/ceph:master
-      copy_image_to_cluster ceph/ceph:v13 ceph/ceph:v13
+      copy_image_to_cluster ceph/ceph:v14.2.1-20190430 ceph/ceph:v14.2.1-20190430
     fi
 
     if [[ "$1" == "" || "$1" == "cockroachdb" ]]; then
@@ -93,6 +93,15 @@ case "${1:-}" in
         else
             echo "To prevent accidental data loss acting only on 'minikube' context. No action is taken."
         fi
+    ;;
+    wordpress)
+      echo "copying the wordpress images"
+      copy_image_to_cluster mysql:5.6 mysql:5.6
+      copy_image_to_cluster wordpress:4.6.1-apache wordpress:4.6.1-apache
+    ;;
+    cockroachdb-loadgen)
+      echo "copying the cockroachdb loadgen images"
+      copy_image_to_cluster cockroachdb/loadgen-kv:0.1 cockroachdb/loadgen-kv:0.1
     ;;
     helm)
         echo " copying rook image for helm"
