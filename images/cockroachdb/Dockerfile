@@ -14,6 +14,7 @@
 
 FROM cockroachdb/cockroach:v2.0.2
 
+COPY crossplane-extension /
 COPY rook /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/rook"]

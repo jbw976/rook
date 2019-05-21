@@ -1,0 +1,52 @@
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - create
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  verbs:
+  - create
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+- apiGroups:
+  - cockroachdb.rook.io
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - storage.crossplane.io
+  resources:
+  - "postgresqlinstances"
+  verbs:
+  - "*"
+- apiGroups:
+  - core.crossplane.io
+  resources:
+  - "resourceclasses"
+  verbs:
+  - "*"

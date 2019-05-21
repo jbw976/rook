@@ -27,6 +27,7 @@ TEMP := $(shell mktemp -d)
 do.build:
 	@echo === docker build $(COCKROACHDB_IMAGE)
 	@cp Dockerfile $(TEMP)
+	@cp -R crossplane-extension $(TEMP)
 	@cp $(OUTPUT_DIR)/bin/linux_$(GOARCH)/rook $(TEMP)
 	@$(DOCKERCMD) build $(BUILD_ARGS) \
 		-t $(COCKROACHDB_IMAGE) \

@@ -1,0 +1,23 @@
+title: Rook-CockroachDB Crossplane Extension
+description: |
+ Rook-CockroachDB extension package for Crossplane
+version: 0.0.1
+maintainers:
+- name: Jared Watts
+  email: jared@upbound.io
+owners:
+- name: Jared Watts
+  email: jared@upbound.io
+company: Upbound
+keywords:
+- "rook"
+- "cockroachdb"
+- "postgresql"
+links:
+- description: Website
+  url: "https://rook.io"
+- description: Docs
+  url: "https://rook.io/docs/rook/v1.0/cockroachdb.html"
+- description: Source Code
+  url: "https://github.com/rook/rook"
+license: Apache-2.0

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rook-cockroachdb-operator
+  namespace: rook-cockroachdb-system
+  labels:
+    app: rook-cockroachdb-operator
+    core.crossplane.io/name: "rook-cockroachdb-operator"
+spec:
+  selector:
+    matchLabels:
+      app: rook-cockroachdb-operator
+      core.crossplane.io/name: "rook-cockroachdb-operator"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rook-cockroachdb-operator
+        core.crossplane.io/name: "rook-cockroachdb-operator"
+    spec:
+      containers:
+      - name: rook-cockroachdb-operator
+        image: rook/cockroachdb:master
+        args: ["cockroachdb", "operator"]
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
