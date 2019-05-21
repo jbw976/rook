@@ -27,7 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/kubernetes/pkg/kubelet/apis"
-	scheduler "k8s.io/kubernetes/pkg/scheduler/algorithm"
+	scheduler "k8s.io/kubernetes/pkg/scheduler/api"
 )
 
 func createNode(nodeName string, condition v1.NodeConditionType, clientset *fake.Clientset) error {

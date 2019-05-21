@@ -53,6 +53,10 @@ ignored = [
     name = "k8s.io/gengo"
     unused-packages = false
 
+[[override]]
+  name = "github.com/golang/protobuf"
+  version = "=v1.3.1"
+
 #
 # Kubernetes projects below should all be updated as a set
 # as they are versioned together.
